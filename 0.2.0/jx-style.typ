@@ -2,7 +2,7 @@
 #import "catppuccin.typ": *
 #import "jx-date.typ": *
 #let irgo(cs, val) = coll.at(cs, default: "default").at(val);
-
+// sync test 
 #let shl(body) = strong[#[#body]<t-ac>]
 #let img(body) = [#[#body]<img>]
 #let q-bg(body) = [#[#body]<t-bg>]
