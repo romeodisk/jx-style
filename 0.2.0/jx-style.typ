@@ -379,14 +379,26 @@
   show math.equation.where(block: true): me => [#set text(size: 1.5em * mathscale); #set block(breakable: true); #align(center)[#me]]
   show link: set text(..fill-ac)
   // OUTLINES --- OUTLINES --- OUTLINES --- OUTLINES --- OUTLINES --- OUTLINES --- OUTLINES --- OUTLINES ---
-  let headingPrefixDisplay = if (headingprefix == "") {
-    none
-  } else {
-    headingprefix + sym.space
-  }
+  let headingPrefixDisplay = if (headingprefix == "") { none } else { headingprefix }
+  
+  show outline.entry: it => [
+    #if(it.prefix() == none) [
+      #link(
+      it.element.location(),
+      it.indented(headingPrefixDisplay+"0", it.inner()),
+    )
+    ] else [
+      #link(
+      it.element.location(),
+      it.indented(headingPrefixDisplay+it.prefix(), it.inner()),
+    )
+    ]
+    
+  ]
+
   set outline(
     depth: 3,
-    indent: 2em,
+    indent: 1.5em,
     title: if (doctype in ("businessPlan", "paper")) {
       none
     } else {
@@ -399,16 +411,16 @@
     // },
   )
   show outline.entry.where(level: 1): ol => if (flags.contains("hl-outlined-h1")) {
+    show link: q-tx
     box(outset: par.leading / 2, fill: bgla, strong(ol))
   } else {
-    strong[#headingPrefixDisplay#ol]
+    show link: q-tx
+    strong(ol)
   }
-  show outline.entry.where(level: 2): ol => q-da(headingPrefixDisplay + ol)
-  show outline.entry.where(level: 3): ol => q-ac(headingPrefixDisplay + ol)
+  show outline.entry.where(level: 2): o => {show link: q-da; o}
+  show outline.entry.where(level: 3): o => {show link: q-ac; o}
 
-  show outline.entry: a => {
-    a
-  }
+  show outline.entry: a => {a}
 
   show outline: a => if (doctype in ("businessPlan", "paper")) {
     show heading: he => {
@@ -566,11 +578,7 @@
     hy
   }
 
-  let headingPrefixDisplay = if (headingprefix == "") {
-    none
-  } else {
-    headingprefix + sym.space
-  }
+
   set heading(
     numbering: (..nums) => if (doctype == "businessPlan") {
       let format = ("I.", "A.", "1.", "I.", "A.", "1.").at(nums.pos().len() - 1)
@@ -672,12 +680,19 @@
                   if (flags.contains("centre-h1-body")) { horizon + center } else { horizon + left },
                 ),
                 grid.cell(inset: (right: 1em, left: 0.75em), stroke: (right: dottedStroke(th: 2pt, ac)))[
-                  #stack(
+
+                  #if(headingsup not in (none, "")) [
+                    #stack(
                     dir: ttb,
                     spacing: 0.125in * linespacing,
                     text(size: 1em, weight: "bold")[#hy.supplement],
                     text(size: 2em, weight: 1000)[#headingPrefixDisplay#counter(heading).display()],
                   )
+                  ] else [
+                    #text(size: 2em, weight: 1000)[#headingPrefixDisplay#counter(heading).display()]
+                  ]
+                  
+
                 ],
                 grid.cell(inset: (left: 1em))[
                   #set par(justify: false)
@@ -1187,7 +1202,7 @@
   set ellipse(stroke: solidStroke(tx))
   set square(stroke: solidStroke(tx))
   set polygon(stroke: solidStroke(tx))
-  set path(stroke: solidStroke(tx))
+  set curve(stroke: solidStroke(tx))
   set line(stroke: solidStroke(tx))
   // CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS --- CUSTOM HIGHLIGHTS ---
   let customhl(back, fore, body) = [
@@ -1485,7 +1500,7 @@
   let authordisplay = if (type(author) == str) {
     author
   } else if (type(author) == array) {
-    author.join("; ")
+    author.join(" • ")
   }
   let sectiondisplay = if (flags.contains("showsection")) {
     emph(if(not flags.contains("patiformat")){" — "}else{none} + section)
